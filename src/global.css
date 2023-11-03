@@ -1,0 +1,10 @@
+@tailwind components;
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 rounded-md font-semibold bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-700;
+  }
+  .btn-secondary {
+    @apply px-4 py-2 rounded-md font-semibold border border-zinc-100/20 bg-zinc-950 text-zinc-100 hover:bg-zinc-100/20;
+  }
+}
