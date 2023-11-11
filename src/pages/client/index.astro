@@ -1,0 +1,83 @@
+---
+import Button from "@/components/Button.astro"
+import Link from "@/components/Link.astro"
+import MainLayout from "@/layouts/MainLayout.astro"
+import prisma from "@/utils/db"
+import Modal from "@/components/Modal.astro"
+import { Icon } from "astro-icon"
+
+const req = Astro.request
+
+if (req.method === "POST") {
+  try {
+    const formData = await req.formData()
+
+    await prisma.client.delete({ where: { id: formData.get("id") } })
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+const clients = await prisma.client.findMany()
+---
+
+<MainLayout>
+  <main class="w-[90vw] mx-auto py-8">
+    <h1 class="text-zinc-100 text-2xl mb-8">List Client</h1>
+    <Link href="/client/new" clsPrimary={true}>Add Client</Link>
+    <table class="border border-zinc-100/20 mt-12 w-full">
+      <thead class="text-zinc-100/60 text-lg">
+        <tr class="border border-zinc-100/20">
+          <th class="py-3">Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody class="text-zinc-100 text-center">
+        {
+          clients?.map((client) => (
+            <tr class="border-b border-b-zinc-100/20">
+              <td class="py-3">{client.name}</td>
+              <td>{client.email}</td>
+              <td>{client.phone}</td>
+              <td>
+                <Button id="delete" data-id={client.id}>
+                  <Icon name="lucide:trash-2" class="w-4 h-4" />
+                </Button>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </main>
+</MainLayout>
+
+<Modal id="modal-delete">
+  <h3 class="text-lg text-zinc-100 text-center">Are you Sure?</h3>
+  <div class="flex gap-x-4 pt-8 justify-center">
+    <form method="dialog">
+      <Button primary={false}>Close</Button>
+    </form>
+    <form method="post">
+      <input type="hidden" name="id" />
+      <Button>Delete</Button>
+    </form>
+  </div>
+</Modal>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const btnDel = document.querySelectorAll("#delete")
+    const inputIdDel = document.querySelector("input[name='id']")
+    const modal = document.getElementById("modal-delete")
+
+    btnDel.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        modal.showModal()
+        inputIdDel.value = btn.dataset.id
+      })
+    })
+  })
+</script>

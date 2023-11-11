@@ -1,0 +1,11 @@
+---
+const { extendClass, ...prop } = Astro.props
+---
+
+<input
+  {...prop}
+  class:list={[
+    "rounded-md w-full bg-zinc-950 text-zinc-100 placeholder:text-zinc-100/40 border-zinc-200/20 focus:ring-zinc-100/95 focus:outline-none focus:border-zinc-100/95",
+    extendClass,
+  ]}
+/>

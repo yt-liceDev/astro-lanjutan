@@ -1,0 +1,108 @@
+---
+import Link from "@/components/Link.astro"
+import MainLayout from "@/layouts/MainLayout.astro"
+import { Icon } from "astro-icon"
+import Label from "@/components/Label.astro"
+import Input from "@/components/Input.astro"
+import Button from "@/components/Button.astro"
+import prisma from "@/utils/db"
+
+const req = Astro.request
+
+if (req.method === "POST") {
+  try {
+    const formData = await req.formData()
+    const {
+      name,
+      description,
+      client: clientId,
+      deadline,
+    } = Object.fromEntries(formData.entries())
+
+    await prisma.project.create({
+      data: {
+        name,
+        description,
+        deadline: new Date(deadline).toISOString(),
+        client: {
+          connect: {
+            id: clientId,
+          },
+        },
+      },
+    })
+
+    return Astro.redirect("/")
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+const clients = await prisma.client.findMany({
+  select: {
+    id: true,
+    name: true,
+  },
+})
+---
+
+<MainLayout>
+  <div class="pl-4 pt-4">
+    <Link id="back-link" cls="flex gap-x-2 text-zinc-100">
+      <Icon name="lucide:arrow-left" class="w-6 h-6" /> Back
+    </Link>
+  </div>
+  <main class="w-[90vw] mx-auto mt-12">
+    <h1 class="text-2xl text-zinc-100 font-semibold">Add Project</h1>
+    <form class="mt-8 space-y-8" method="post">
+      <div class="flex items-center">
+        <Label>Project name :</Label>
+        <div class="basis-1/4">
+          <Input name="name" placeholder="Chat App" />
+        </div>
+      </div>
+      <div class="flex items-center">
+        <Label>Description :</Label>
+        <div class="basis-1/4">
+          <textarea
+            name="description"
+            rows="3"
+            class="border border-zinc-100/20 rounded-md w-full resize-none bg-zinc-950 text-zinc-100 focus:ring-zinc-100/95 focus:outline-none focus:border-zinc-100/95"
+          ></textarea>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <Label>Client :</Label>
+        <div class="basis-1/4">
+          <select
+            name="client"
+            class="w-full cursor-pointer rounded-md border border-zinc-100/20 bg-zinc-950 text-zinc-100 focus:ring-transparent focus:outline-none focus:border-zinc-100/20"
+          >
+            <option selected disabled>Select</option>
+            {clients?.map((client) => <option value={client.id}>{client.name}</option>)}
+          </select>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <Label>Deadline :</Label>
+        <div class="basis-1/4">
+          <Input name="deadline" type="date" extendClass="dark:[color-scheme:dark]" />
+        </div>
+      </div>
+      <Button>Submit</Button>
+    </form>
+  </main>
+</MainLayout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const backLink = document.getElementById("back-link")
+
+    backLink.setAttribute("href", document.referrer)
+
+    backLink.onclick = () => {
+      history.back()
+      return false
+    }
+  })
+</script>

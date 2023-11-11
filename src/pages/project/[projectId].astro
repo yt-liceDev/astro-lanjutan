@@ -1,0 +1,76 @@
+---
+import Button from "@/components/Button.astro"
+import Link from "@/components/Link.astro"
+import MainLayout from "@/layouts/MainLayout.astro"
+import prisma from "@/utils/db"
+import { Icon } from "astro-icon"
+
+export const prerender = false
+
+const { projectId } = Astro.params
+const req = Astro.request
+
+if (req.method === "POST") {
+  try {
+    await prisma.project.delete({ where: { id: projectId } })
+
+    return Astro.redirect("/")
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+const project = await prisma.project.findUnique({
+  where: { id: projectId },
+  include: { client: true },
+})
+---
+
+<MainLayout>
+  <div class="pl-4 pt-4">
+    <Link href="/" id="back-link" cls="flex gap-x-2 text-zinc-100">
+      <Icon name="lucide:arrow-left" class="w-6 h-6" /> Back
+    </Link>
+  </div>
+  <main class="w-[90vw] mx-auto pb-8 mt-12">
+    <section class="text-zinc-100 space-y-8">
+      <div>
+        <h3 class="text-3xl font-bold">{project?.name}</h3>
+        <p class="mt-4">{project?.description}</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold">Project Status</h3>
+        <p class="mt-4">{project?.isCompleted ? "Completed" : "In Progress"}</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold">Project Created</h3>
+        <p class="mt-4">{Intl.DateTimeFormat("id").format(project?.createdAt)}</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold">Deadline</h3>
+        <p class="mt-4">{Intl.DateTimeFormat("id").format(project?.deadline)}</p>
+      </div>
+      <div class="space-y-4">
+        <h2 class="text-xl font-bold">Client Information</h2>
+        <p class="flex gap-x-2">
+          <Icon name="lucide:user" class="w-6 h-6" />
+          {project?.client?.name}
+        </p>
+        <p class="flex gap-x-2">
+          <Icon name="lucide:message-square" class="w-6 h-6" />
+          {project?.client?.email}
+        </p>
+        <p class="flex gap-x-2">
+          <Icon name="lucide:phone" class="w-6 h-6" />
+          {project?.client?.phone}
+        </p>
+      </div>
+    </section>
+    <div class="w-2/4 flex justify-end gap-x-4">
+      <form method="post">
+        <Button>Delete</Button>
+      </form>
+      <Link href={`/project/edit?projectId=${project.id}`} clsSecondary={true}>Edit</Link>
+    </div>
+  </main>
+</MainLayout>

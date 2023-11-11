@@ -1,0 +1,94 @@
+---
+import Link from "@/components/Link.astro"
+import MainLayout from "@/layouts/MainLayout.astro"
+import { Icon } from "astro-icon"
+import Label from "@/components/Label.astro"
+import Input from "@/components/Input.astro"
+import Button from "@/components/Button.astro"
+import prisma from "@/utils/db"
+
+const req = Astro.request
+
+const errors = {}
+const values = {}
+let hasError
+
+if (req.method === "POST") {
+  try {
+    const formData = await req.formData()
+    const { name, email, phone } = Object.fromEntries(formData.entries())
+
+    if (name.length < 1) {
+      errors.name = "this is required"
+      values.email = email
+    }
+
+    hasError = Object.values(errors).some((msg) => msg)
+
+    if (!hasError) {
+      await prisma.client.create({
+        data: {
+          name,
+          email,
+          phone,
+        },
+      })
+
+      return Astro.redirect("/client")
+    }
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+---
+
+<MainLayout>
+  <div class="pl-4 pt-4">
+    <Link id="back-link" cls="flex gap-x-2 text-zinc-100">
+      <Icon name="lucide:arrow-left" class="w-6 h-6" /> Back
+    </Link>
+  </div>
+  <main class="w-[90vw] mx-auto mt-12">
+    <h1 class="text-2xl text-zinc-100 font-semibold">Add Client</h1>
+    <form class="mt-8 space-y-8" method="post">
+      <div class="flex items-center">
+        <Label>Name :</Label>
+        <div class="basis-1/4">
+          <Input name="name" placeholder="John" />
+          <small class="text-red-400">{errors?.name && errors.name}</small>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <Label>Email :</Label>
+        <div class="basis-1/4">
+          <Input
+            type="email"
+            name="email"
+            value={hasError ? values.email : ""}
+            placeholder="john@test.com"
+          />
+        </div>
+      </div>
+      <div class="flex items-center">
+        <Label>Phone :</Label>
+        <div class="basis-1/4">
+          <Input name="phone" type="tel" placeholder="9876543" />
+        </div>
+      </div>
+      <Button>Submit</Button>
+    </form>
+  </main>
+</MainLayout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const backLink = document.getElementById("back-link")
+
+    backLink.setAttribute("href", document.referrer)
+
+    backLink.onclick = () => {
+      history.back()
+      return false
+    }
+  })
+</script>

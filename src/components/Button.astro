@@ -1,0 +1,9 @@
+---
+const { primary = true, ...prop } = Astro.props
+
+const baseClass = primary ? "btn-primary" : "btn-secondary"
+---
+
+<button class:list={[baseClass]} {...prop}>
+  <slot />
+</button>

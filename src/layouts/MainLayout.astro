@@ -1,0 +1,25 @@
+---
+import Navbar from "@/components/Navbar.astro"
+import "@/global.css"
+import "@fontsource/lato/400.css"
+import "@fontsource/lato/700.css"
+import { ViewTransitions, fade } from "astro:transitions"
+
+const { title = "My PM" } = Astro.props
+---
+
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <ViewTransitions />
+  </head>
+  <body class="bg-zinc-950">
+    <Navbar />
+    <div transition:animate={fade({ duration: "0.4s" })} class="mt-12">
+      <slot />
+    </div>
+  </body>
+</html>

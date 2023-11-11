@@ -1,0 +1,30 @@
+---
+import Link from "@/components/Link.astro"
+const { pathname } = Astro.url
+---
+
+<nav
+  class="h-14 fixed flex items-center justify-between top-0 bg-zinc-950/70 backdrop-blur-lg w-full px-4 py-3 border-b border-b-zinc-100/20"
+>
+  <h1 class="text-zinc-100 text-xl font-bold basis-2/5">My PM</h1>
+  <div class="basis-3/5">
+    <ul class="flex gap-x-6">
+      <li
+        class:list={[
+          "text-zinc-100/70 hover:text-zinc-100/90",
+          { "font-bold text-zinc-100/95": pathname === "/" },
+        ]}
+      >
+        <Link href="/">Home</Link>
+      </li>
+      <li
+        class:list={[
+          "text-zinc-100/70 hover:text-zinc-100/90",
+          { "font-bold text-zinc-100/95": pathname === "/client" },
+        ]}
+      >
+        <Link href="/client">Client</Link>
+      </li>
+    </ul>
+  </div>
+</nav>
